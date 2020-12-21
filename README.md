@@ -1,7 +1,6 @@
-***Customize Elasticsearch Index management process when using Kinesis
-Firehose ***
+# Customize Elasticsearch Index management process when using Kinesis Firehose 
 
-Amazon Elasticsearch Service (Amazon ES) is a managed service that makes
+[Amazon Elasticsearch Service (Amazon ES)](https://aws.amazon.com/elasticsearch-service/) is a managed service that makes
 it easy to deploy, operate, and scale Elasticsearch clusters in the AWS
 Cloud. With Amazon ES, you get direct access to the Elasticsearch APIs;
 existing code and applications work seamlessly with the service.
@@ -41,8 +40,7 @@ allows you to collect data from streaming sources and index them to AWS
 Elasticsearch for performing Text Searches and Analytics using Kibana or
 Other Applications.
 
-Currently at the time of writing Kinesis Firehose does allow you to
-manage Index rotation based on Time which could be Hourly, Daily,
+Kinesis Firehose does allow you to manage Index rotation based on Time which could be Hourly, Daily,
 Monthly or Yearly. In real world customers find the streaming data
 volume to be very unpredictable which means having a time-based index
 pattern even with best of approximation creates different sized index in
@@ -56,13 +54,13 @@ rotation logic from time based to a data size based logic so that if
 there is unpredictable traffic on the cluster, Firehose and
 Elasticsearch will create indexes with the same size
 
-Requirements for this setup:
+### Requirements for this setup:
 
 a)  Amazon Elasticsearch Service cluster with Version 5.3/5.5/6.0
 
 b)  A Cronjob or a curator setup for the AWS Elasticsearch cluster
 
-To get set up, follow these steps:
+### To get set up, follow these steps:
 
 a)  First create a Kinesis Firehose with Index Rotation set to
     “No Rotation”. We also select an index name which we would later
@@ -204,7 +202,7 @@ With this setup, Amazon ES creates an index daily. If the data exceeds 1
 index threshold Amazon ES creates a new index with an incremented
 sequence number.
 
-Some Important Edge Cases using this Architecture:
+## Some Important Edge Cases using this Architecture:
 
 a)  Since we demonstrated using date based index so, to ensure that all
     date received in a day stays in the index name with that date, the
