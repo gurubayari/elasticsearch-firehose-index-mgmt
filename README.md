@@ -67,7 +67,7 @@ a)  First create a Kinesis Firehose with Index Rotation set to
     create as an alias in Elasticsearch. Set the index name to be
     “streamingdata”
 
-![](media/firehouse_dest.png){width="4.30625in" height="3.5337259405074364in"}
+![](media/firehouse_dest.png)
 
 b)  “ES Buffer size” and “ES buffer Interval” are two settings that
     depends on the rate at which data is arriving in Kinesis. An average
