@@ -1,4 +1,4 @@
-# Customize Elasticsearch Index management process when using Kinesis Firehose 
+# Customize Elasticsearch index management process when using Kinesis Firehose 
 
 [Amazon Elasticsearch Service (Amazon ES)](https://aws.amazon.com/elasticsearch-service/) is a managed service that makes
 it easy to deploy, operate, and scale Elasticsearch clusters in the AWS
@@ -40,8 +40,8 @@ allows you to collect data from streaming sources and index them to AWS
 Elasticsearch for performing Text Searches and Analytics using Kibana or
 Other Applications.
 
-Kinesis Firehose does allow you to manage Index rotation based on Time which could be Hourly, Daily,
-Monthly or Yearly. In real world customers find the streaming data
+Kinesis Firehose does allow you to manage an index rotation based on time which could be hourly, daily,
+monthly or yearly. In real world customers find the streaming data
 volume to be very unpredictable which means having a time-based index
 pattern even with best of approximation creates different sized index in
 Elasticsearch and hence induces a problematic Data skew issue in AWS
@@ -49,16 +49,16 @@ Elasticsearch cluster. As these data sources are running always over
 longer periods the data skew magnifies and causes the ES cluster to
 perform poorly or even fail.
 
-In this blog, we describe a fix for this issue by moving the index
+In this blog, we describe a possible fix for this issue by moving the index
 rotation logic from time based to a data size based logic so that if
 there is unpredictable traffic on the cluster, Firehose and
-Elasticsearch will create indexes with the same size
+Elasticsearch will create indexes with the same size for better performance. 
 
 ### Requirements for this setup:
 
 a)  Amazon Elasticsearch Service cluster with Version 5.3/5.5/6.0
 
-b)  A Cronjob or a curator setup for the AWS Elasticsearch cluster
+b)  A Cronjob or scheduled Lambda or a curator setup for the AWS Elasticsearch cluster
 
 ### To get set up, follow these steps:
 
@@ -67,15 +67,15 @@ a)  First create a Kinesis Firehose with Index Rotation set to
     create as an alias in Elasticsearch. Set the index name to be
     “streamingdata”
 
-![](media/image1.png){width="4.30625in" height="3.5337259405074364in"}
+![](media/firehouse_dest.png){width="4.30625in" height="3.5337259405074364in"}
 
-a)  “ES Buffer size” and “ES buffer Interval” are two settings that
+b)  “ES Buffer size” and “ES buffer Interval” are two settings that
     depends on the rate at which data is arriving in Kinesis. An average
     value of these settings should be such that the rate at which bulk
     request are created and they payload size is optimized based on the
-    Elasticsearch provisioning.
+    Elasticsearch provisioning. Refer to following [blog](https://aws.amazon.com/blogs/database/send-apache-web-logs-to-amazon-elasticsearch-service-with-kinesis-firehose/ ) for more details. 
 
-b)  Before creating alias and index in AWS Elasticsearch, index template
+c)  Before creating alias and index in AWS Elasticsearch, index template
     should be prepared. This template has the default settings used by
     all the indexes created by Elasticsearch through Firehose stream.
     Apart from mapping information the major setting that has to be
@@ -112,7 +112,7 @@ b)  Before creating alias and index in AWS Elasticsearch, index template
 >
 > }'
 
-a)  To Create the index and the Alias name in Elasticsearch, use dynamic
+d)  To Create the index and the Alias name in Elasticsearch, use dynamic
     Index naming. Replace the ELASTICSEARCH\_ENDPOINT with the AWS
     Elasticsearch endpoint. The below call creates an alias with the
     name “streamingdata”. This API call creates an index with a dynamic
@@ -128,14 +128,14 @@ ELASTICSEARCH\_ENDPOINT/%3Cstreamingdata-%7Bnow%2Fd%7D-000001%3E -d '{
 > data that was indexed during that day without you worrying about how
 > many underlying indexes were used to store the data
 
-a)  Next, create a curator script that runs every minute. The contents
+e)  Next, create a curator script that runs every minute. The contents
     of the Script are below
 
     curl -XPOST 'https://ES\_ENDPOINT/streamingdata/\_rollover?pretty'
     -H 'Content-Type: application/json' -d'{ "conditions": {
     "max\_docs": "100000" } }'
 
-b)  Two-possible ways to automate the run of the above script is using
+f)  Two-possible ways to automate the run of the above script is using
     Linux Cron or Curator. If using curator, you can automate the
     running of this script by using this action file.
 
